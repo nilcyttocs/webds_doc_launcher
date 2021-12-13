@@ -18,14 +18,14 @@ import { WebDSDocLauncher } from './launcher';
 import { documentationIcon } from './icons';
 
 /**
- * Initialization data for the webds_doc_launcher extension.
+ * Initialization data for the @webds/doc_launcher extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: 'webds_doc_launcher:plugin',
+  id: '@webds/doc_launcher:plugin',
   autoStart: true,
   requires: [ILauncher, ILayoutRestorer],
   activate: (app: JupyterFrontEnd, launcher: ILauncher, restorer: ILayoutRestorer) => {
-    console.log('JupyterLab extension webds_doc_launcher is activated!');
+    console.log('JupyterLab extension @webds/doc_launcher is activated!');
 
     let widget: MainAreaWidget;
     const { commands, shell } = app;
@@ -33,7 +33,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     commands.addCommand(command, {
       label: 'Documentation',
       caption: 'Documentation',
-      icon: (args: { [x: string]: any; }) => (args['isLauncher'] ? documentationIcon : undefined),
+      icon: (args: { [x: string]: any }) => (args['isLauncher'] ? documentationIcon : undefined),
       execute: () => {
         if (!widget || widget.isDisposed) {
           const callback = (item: Widget): void => {
@@ -41,13 +41,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
           };
           const docLauncher = new WebDSDocLauncher(commands, launcher.items(), callback);
           widget = new MainAreaWidget({ content: docLauncher });
-          widget.id = 'webds_doc_launcher';
+          widget.id = 'webds_doc_launcher_widget';
           widget.title.label = 'WebDS Documentation';
           widget.title.closable = true;
         }
 
         if (!tracker.has(widget))
           tracker.add(widget);
+
         if (!widget.isAttached)
           shell.add(widget, 'main');
 
