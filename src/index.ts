@@ -43,6 +43,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
           widget = new MainAreaWidget({ content: docLauncher });
           widget.id = 'webds_doc_launcher_widget';
           widget.title.label = 'WebDS Documentation';
+          widget.title.icon = documentationIcon;
           widget.title.closable = true;
         }
 
