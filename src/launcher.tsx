@@ -91,7 +91,7 @@ export class WebDSDocLauncher extends VDomRenderer {
                 <div className="jp-NewLauncher-sectionHeader">
                     <webdsIcon.react stylesheet="launcherSection"/>
                     <h2 className="jp-NewLauncher-sectionTitle">
-                        {'WebDS Documentation'}
+                        {'WebDS - Documentation'}
                     </h2>
                 </div>
             <div className="jp-NewLauncher-cardContainer">

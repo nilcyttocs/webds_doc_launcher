@@ -15,7 +15,10 @@ import { Widget } from '@lumino/widgets';
 
 import { WebDSDocLauncher } from './launcher';
 
-import { documentationIcon } from './icons';
+import { 
+  documentationIcon,
+  webdsIcon
+} from './icons';
 
 /**
  * Initialization data for the @webds/doc_launcher extension.
@@ -42,8 +45,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           const docLauncher = new WebDSDocLauncher(commands, launcher.items(), callback);
           widget = new MainAreaWidget({ content: docLauncher });
           widget.id = 'webds_doc_launcher_widget';
-          widget.title.label = 'WebDS Documentation';
-          widget.title.icon = documentationIcon;
+          widget.title.label = 'WebDS - Documentation';
+          widget.title.icon = webdsIcon;
           widget.title.closable = true;
         }
 
