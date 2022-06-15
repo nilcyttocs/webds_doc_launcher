@@ -57,7 +57,8 @@
     "@lumino/coreutils": "^1.5.3",
     "@lumino/disposable": "^1.4.3",
     "@lumino/properties": "^1.2.3",
-    "@lumino/widgets": "^1.19.0"
+    "@lumino/widgets": "^1.19.0",
+    "@webds/service": "file:../webds_service"
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
@@ -81,7 +82,13 @@
   },
   "jupyterlab": {
     "extension": true,
-    "outputDir": "webds_doc_launcher/labextension"
+    "outputDir": "webds_doc_launcher/labextension",
+    "sharedPackages": {
+      "@webds/service": {
+        "bundled": false,
+        "singleton": true
+      }
+    }
   },
   "jupyter-releaser": {
     "hooks": {
