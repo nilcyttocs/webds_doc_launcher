@@ -14,7 +14,16 @@ import { WebDSWidget } from "@webds/service";
 
 import { WebDSDocLauncher } from "./launcher";
 
-import { documentationIcon, webdsIcon } from "./icons";
+import { documentationIcon } from "./icons";
+
+namespace Attributes {
+  export const command = "webds_doc_launcher:open";
+  export const id = "webds_doc_launcher_widget";
+  export const label = "Documentation";
+  export const caption = "Documentation";
+  export const category = "DSDK - Application";
+  export const rank = 20;
+}
 
 /**
  * Initialization data for the @webds/doc_launcher extension.
@@ -32,10 +41,10 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
     let widget: WebDSWidget;
     const { commands, shell } = app;
-    const command: string = "webds_doc_launcher:open";
+    const command = Attributes.command;
     commands.addCommand(command, {
-      label: "Documentation",
-      caption: "Documentation",
+      label: Attributes.label,
+      caption: Attributes.caption,
       icon: (args: { [x: string]: any }) =>
         args["isLauncher"] ? documentationIcon : undefined,
       execute: () => {
@@ -49,9 +58,9 @@ const plugin: JupyterFrontEndPlugin<void> = {
             callback
           );
           widget = new WebDSWidget({ content: docLauncher });
-          widget.id = "webds_doc_launcher_widget";
-          widget.title.label = "WebDS - Documentation";
-          widget.title.icon = webdsIcon;
+          widget.id = Attributes.id;
+          widget.title.label = Attributes.label;
+          widget.title.icon = documentationIcon;
           widget.title.closable = true;
         }
 
@@ -66,14 +75,14 @@ const plugin: JupyterFrontEndPlugin<void> = {
     launcher.add({
       command,
       args: { isLauncher: true },
-      category: "WebDS",
-      rank: 1
+      category: Attributes.category,
+      rank: Attributes.rank
     });
 
     let tracker = new WidgetTracker<WebDSWidget>({
-      namespace: "webds_doc_launcher"
+      namespace: Attributes.id
     });
-    restorer.restore(tracker, { command, name: () => "webds_doc_launcher" });
+    restorer.restore(tracker, { command, name: () => Attributes.id });
   }
 };
 
