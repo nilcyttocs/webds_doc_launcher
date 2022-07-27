@@ -10,7 +10,7 @@ import { ILauncher } from "@jupyterlab/launcher";
 
 import { Widget } from "@lumino/widgets";
 
-import { WebDSWidget } from "@webds/service";
+import { WebDSService, WebDSWidget } from "@webds/service";
 
 import { WebDSDocLauncher } from "./launcher";
 
@@ -32,10 +32,12 @@ const plugin: JupyterFrontEndPlugin<void> = {
   id: "@webds/doc_launcher:plugin",
   autoStart: true,
   requires: [ILauncher, ILayoutRestorer],
+  optional: [WebDSService],
   activate: (
     app: JupyterFrontEnd,
     launcher: ILauncher,
-    restorer: ILayoutRestorer
+    restorer: ILayoutRestorer,
+    service: WebDSService | null
   ) => {
     console.log("JupyterLab extension @webds/doc_launcher is activated!");
 
@@ -55,7 +57,8 @@ const plugin: JupyterFrontEndPlugin<void> = {
           const docLauncher = new WebDSDocLauncher(
             commands,
             launcher.items(),
-            callback
+            callback,
+            service
           );
           widget = new WebDSWidget({ content: docLauncher });
           widget.id = Attributes.id;

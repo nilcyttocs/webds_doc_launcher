@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { showErrorMessage, VDomRenderer } from "@jupyterlab/apputils";
+import { VDomRenderer } from "@jupyterlab/apputils";
 
 import { ILauncher } from "@jupyterlab/launcher";
 
@@ -10,9 +10,11 @@ import { each, IIterator } from "@lumino/algorithm";
 
 import { CommandRegistry } from "@lumino/commands";
 
+import { AttachedProperty } from "@lumino/properties";
+
 import { Widget } from "@lumino/widgets";
 
-import { webdsIcon } from "./icons";
+import { WebDSService } from "@webds/service";
 
 const LAUNCHER_CLASS = "jp-webdsDocLauncher";
 
@@ -20,13 +22,35 @@ export class WebDSDocLauncher extends VDomRenderer {
   constructor(
     commands: CommandRegistry,
     items: IIterator<ILauncher.IItemOptions>,
-    callback: (widget: Widget) => void
+    callback: (widget: Widget) => void,
+    service: WebDSService | null
   ) {
     super();
     this._items = items;
     this._commands = commands;
     this._callback = callback;
+    this._service = service;
     this.addClass(LAUNCHER_CLASS);
+  }
+
+  get pending(): boolean {
+    return this._pending;
+  }
+  set pending(value: boolean) {
+    this._pending = value;
+  }
+
+  addToFavourites(item: ILauncher.IItemOptions): void {
+    if (this._service) {
+      const webdsLauncher = this._service.ui.getWebDSLauncher() as any;
+      const webdsLauncherModel = this._service.ui.getWebDSLauncherModel() as any;
+      if (webdsLauncherModel) {
+        webdsLauncherModel.addToFavourites(item);
+      }
+      if (webdsLauncher) {
+        webdsLauncher.update();
+      }
+    }
   }
 
   protected render(): React.ReactElement<any> | null {
@@ -43,59 +67,15 @@ export class WebDSDocLauncher extends VDomRenderer {
       return Private.sortCmp(a, b, this._commands);
     });
 
-    const onClickFactory = (item: any): ((event: any) => void) => {
-      const onClick = (event: Event): void => {
-        event.stopPropagation();
-        this._commands
-          .execute(item.command, { ...item.args })
-          .then((value) => {
-            if (value instanceof Widget) {
-              this._callback(value);
-            }
-          })
-          .catch((error) => {
-            showErrorMessage("webds_doc_launcher error", error);
-          });
-      };
-      return onClick;
-    };
-
     const cards: React.ReactElement<any>[] = [];
 
     docItems.forEach((item) => {
-      const command = item.command;
-      const args = { ...item.args };
-      const label = this._commands.label(command, args);
-      const caption = this._commands.caption(command, args);
-      const iconClass = this._commands.iconClass(command, args);
-      const _icon = this._commands.icon(command, args);
-      const icon = _icon === iconClass ? undefined : _icon;
-      const mainOnClick = onClickFactory(item);
-      const card = (
-        <div
-          className="jp-webdsDocLauncher-item"
-          title={caption}
-          onClick={mainOnClick}
-        >
-          <div className="jp-webdsDocLauncherCard-icon">
-            <LabIcon.resolveReact
-              icon={icon}
-              iconClass={classes(iconClass, "jp-Icon-cover")}
-              stylesheet="launcherCard"
-            />
-          </div>
-          <div className="jp-webdsDocLauncher-label" title={label}>
-            {label}
-          </div>
-        </div>
-      );
-      cards.push(card);
+      cards.push(Card(item, this, this._commands, this._callback));
     });
 
     const content: React.ReactElement<any> = (
       <div className="jp-webdsDocLauncher-section" key={"webds_doc_launcher"}>
         <div className="jp-webdsDocLauncher-sectionHeader">
-          <webdsIcon.react stylesheet="launcherSection" />
           <h2 className="jp-webdsDocLauncher-sectionTitle">
             {"DSDK - Documentation"}
           </h2>
@@ -116,9 +96,105 @@ export class WebDSDocLauncher extends VDomRenderer {
   private _items: IIterator<ILauncher.IItemOptions>;
   private _commands: CommandRegistry;
   private _callback: (widget: Widget) => void;
+  private _pending = false;
+  private _service: WebDSService | null;
+}
+
+function Card(
+  item: ILauncher.IItemOptions,
+  launcher: WebDSDocLauncher,
+  commands: CommandRegistry,
+  launcherCallback: (widget: Widget) => void
+): React.ReactElement<any> {
+  const command = item.command;
+  const args = { ...item.args };
+  const label = commands.label(command, args);
+  const caption = commands.caption(command, args);
+  const iconClass = commands.iconClass(command, args);
+  const _icon = commands.icon(command, args);
+  const icon = _icon === iconClass ? undefined : _icon;
+
+  let pendingClick: any;
+
+  const onClickFactory = (
+    item: ILauncher.IItemOptions
+  ): ((event: any) => void) => {
+    const onClick = (event: Event): void => {
+      clearTimeout(pendingClick);
+      pendingClick = setTimeout(function () {
+        event.stopPropagation();
+        if (launcher.pending === true) {
+          return;
+        }
+        launcher.pending = true;
+        void commands
+          .execute(item.command, { ...item.args })
+          .then((value) => {
+            launcher.pending = false;
+            if (value instanceof Widget) {
+              launcherCallback(value);
+              launcher.dispose();
+            }
+          })
+          .catch((reason) => {
+            launcher.pending = false;
+            console.error(`Failed to launch launcher item\n${reason}`);
+          });
+      }, 250);
+    };
+
+    return onClick;
+  };
+
+  const mainOnClick = onClickFactory(item);
+
+  const onDoubleClickFactory = (
+    item: ILauncher.IItemOptions
+  ): ((event: any) => void) => {
+    const onDoubleClick = (event: Event): void => {
+      clearTimeout(pendingClick);
+      event.stopPropagation();
+      launcher.addToFavourites(item);
+    };
+
+    return onDoubleClick;
+  };
+
+  const mainOnDoubleClick = onDoubleClickFactory(item);
+
+  return (
+    <div
+      className="jp-webdsDocLauncher-item"
+      key={Private.keyProperty.get(item)}
+      title={caption}
+      onClick={mainOnClick}
+      onDoubleClick={mainOnDoubleClick}
+    >
+      <div className="jp-webdsDocLauncherCard-icon">
+        <LabIcon.resolveReact
+          icon={icon}
+          iconClass={classes(iconClass, "jp-Icon-cover")}
+          stylesheet="launcherCard"
+        />
+      </div>
+      <div className="jp-webdsDocLauncher-label" title={label}>
+        {label}
+      </div>
+    </div>
+  );
 }
 
 namespace Private {
+  let id = 0;
+
+  export const keyProperty = new AttachedProperty<
+    ILauncher.IItemOptions,
+    number
+  >({
+    name: "key",
+    create: (): number => id++
+  });
+
   export function sortCmp(
     a: ILauncher.IItemOptions,
     b: ILauncher.IItemOptions,
