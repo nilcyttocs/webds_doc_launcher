@@ -21,7 +21,7 @@ namespace Attributes {
   export const id = "webds_doc_launcher_widget";
   export const label = "Documentation";
   export const caption = "Documentation";
-  export const category = "DSDK - Application";
+  export const category = "DSDK - Applications";
   export const rank = 20;
 }
 

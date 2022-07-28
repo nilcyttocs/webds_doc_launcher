@@ -86,6 +86,7 @@
   font-weight: normal;
   color: var(--jp-ui-font-color1);
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 /* Launcher cards */
@@ -104,8 +105,10 @@
   flex-direction: column;
   justify-content: space-between;
   cursor: pointer;
-  width: var(--jp-private-doc-launcher-card-size);
-  height: var(--jp-private-doc-launcher-card-size);
+  min-width: var(--jp-private-doc-launcher-card-size);
+  max-width: var(--jp-private-doc-launcher-card-size);
+  min-height: var(--jp-private-doc-launcher-card-size);
+  max-height: var(--jp-private-doc-launcher-card-size);
   margin: 8px;
   padding: 0px;
   border: 1px solid var(--jp-border-color2);
