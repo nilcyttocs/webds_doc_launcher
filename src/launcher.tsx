@@ -114,33 +114,32 @@ function Card(
   const _icon = commands.icon(command, args);
   const icon = _icon === iconClass ? undefined : _icon;
 
-  let pendingClick: any;
+  const id = `webds-launcher-card-${label
+    .replace(/ /g, "-")
+    .replace(/[()]/g, "")}`;
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
   ): ((event: any) => void) => {
     const onClick = (event: Event): void => {
-      clearTimeout(pendingClick);
-      pendingClick = setTimeout(function () {
-        event.stopPropagation();
-        if (launcher.pending === true) {
-          return;
-        }
-        launcher.pending = true;
-        void commands
-          .execute(item.command, { ...item.args })
-          .then((value) => {
-            launcher.pending = false;
-            if (value instanceof Widget) {
-              launcherCallback(value);
-              launcher.dispose();
-            }
-          })
-          .catch((reason) => {
-            launcher.pending = false;
-            console.error(`Failed to launch launcher item\n${reason}`);
-          });
-      }, 250);
+      event.stopPropagation();
+      if (launcher.pending === true) {
+        return;
+      }
+      launcher.pending = true;
+      void commands
+        .execute(item.command, { ...item.args })
+        .then((value) => {
+          launcher.pending = false;
+          if (value instanceof Widget) {
+            launcherCallback(value);
+            launcher.dispose();
+          }
+        })
+        .catch((reason) => {
+          launcher.pending = false;
+          console.error(`Failed to launch launcher item\n${reason}`);
+        });
     };
 
     return onClick;
@@ -148,27 +147,13 @@ function Card(
 
   const mainOnClick = onClickFactory(item);
 
-  const onDoubleClickFactory = (
-    item: ILauncher.IItemOptions
-  ): ((event: any) => void) => {
-    const onDoubleClick = (event: Event): void => {
-      clearTimeout(pendingClick);
-      event.stopPropagation();
-      launcher.addToFavourites(item);
-    };
-
-    return onDoubleClick;
-  };
-
-  const mainOnDoubleClick = onDoubleClickFactory(item);
-
   return (
     <div
       className="jp-webdsDocLauncher-item"
+      id={id}
       key={Private.keyProperty.get(item)}
       title={caption}
       onClick={mainOnClick}
-      onDoubleClick={mainOnDoubleClick}
     >
       <div className="jp-webdsDocLauncherCard-icon">
         <LabIcon.resolveReact
