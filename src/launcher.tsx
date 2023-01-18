@@ -1,22 +1,15 @@
-import * as React from "react";
+import * as React from 'react';
 
-import { VDomRenderer } from "@jupyterlab/apputils";
+import { VDomRenderer } from '@jupyterlab/apputils';
+import { ILauncher } from '@jupyterlab/launcher';
+import { classes, LabIcon } from '@jupyterlab/ui-components';
+import { each, IIterator } from '@lumino/algorithm';
+import { CommandRegistry } from '@lumino/commands';
+import { AttachedProperty } from '@lumino/properties';
+import { Widget } from '@lumino/widgets';
+import { WebDSService } from '@webds/service';
 
-import { ILauncher } from "@jupyterlab/launcher";
-
-import { classes, LabIcon } from "@jupyterlab/ui-components";
-
-import { each, IIterator } from "@lumino/algorithm";
-
-import { CommandRegistry } from "@lumino/commands";
-
-import { AttachedProperty } from "@lumino/properties";
-
-import { Widget } from "@lumino/widgets";
-
-import { WebDSService } from "@webds/service";
-
-const LAUNCHER_CLASS = "jp-webdsDocLauncher";
+const LAUNCHER_CLASS = 'jp-webdsDocLauncher';
 
 export class WebDSDocLauncher extends VDomRenderer {
   constructor(
@@ -55,8 +48,8 @@ export class WebDSDocLauncher extends VDomRenderer {
 
   protected render(): React.ReactElement<any> | null {
     const docItems: any[] = [];
-    each(this._items, (item) => {
-      if (item.category == "DSDK - Documentation") {
+    each(this._items, item => {
+      if (item.category == 'DSDK - Documentation') {
         docItems.push(item);
       }
     });
@@ -69,15 +62,15 @@ export class WebDSDocLauncher extends VDomRenderer {
 
     const cards: React.ReactElement<any>[] = [];
 
-    docItems.forEach((item) => {
+    docItems.forEach(item => {
       cards.push(Card(item, this, this._commands, this._callback));
     });
 
     const content: React.ReactElement<any> = (
-      <div className="jp-webdsDocLauncher-section" key={"webds_doc_launcher"}>
+      <div className="jp-webdsDocLauncher-section" key={'webds_doc_launcher'}>
         <div className="jp-webdsDocLauncher-sectionHeader">
           <h2 className="jp-webdsDocLauncher-sectionTitle">
-            {"DSDK - Documentation"}
+            {'DSDK - Documentation'}
           </h2>
         </div>
         <div className="jp-webdsDocLauncher-cardContainer">{cards}</div>
@@ -115,8 +108,8 @@ function Card(
   const icon = _icon === iconClass ? undefined : _icon;
 
   const id = `webds-launcher-card-${label
-    .replace(/ /g, "-")
-    .replace(/[()]/g, "")}`;
+    .replace(/ /g, '-')
+    .replace(/[()]/g, '')}`;
 
   const onClickFactory = (
     item: ILauncher.IItemOptions
@@ -129,14 +122,14 @@ function Card(
       launcher.pending = true;
       void commands
         .execute(item.command, { ...item.args })
-        .then((value) => {
+        .then(value => {
           launcher.pending = false;
           if (value instanceof Widget) {
             launcherCallback(value);
             launcher.dispose();
           }
         })
-        .catch((reason) => {
+        .catch(reason => {
           launcher.pending = false;
           console.error(`Failed to launch launcher item\n${reason}`);
         });
@@ -158,7 +151,7 @@ function Card(
       <div className="jp-webdsDocLauncherCard-icon">
         <LabIcon.resolveReact
           icon={icon}
-          iconClass={classes(iconClass, "jp-Icon-cover")}
+          iconClass={classes(iconClass, 'jp-Icon-cover')}
           stylesheet="launcherCard"
         />
       </div>
@@ -176,7 +169,7 @@ namespace Private {
     ILauncher.IItemOptions,
     number
   >({
-    name: "key",
+    name: 'key',
     create: (): number => id++
   });
 

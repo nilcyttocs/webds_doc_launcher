@@ -2,26 +2,21 @@ import {
   ILayoutRestorer,
   JupyterFrontEnd,
   JupyterFrontEndPlugin
-} from "@jupyterlab/application";
+} from '@jupyterlab/application';
+import { WidgetTracker } from '@jupyterlab/apputils';
+import { ILauncher } from '@jupyterlab/launcher';
+import { Widget } from '@lumino/widgets';
+import { WebDSService, WebDSWidget } from '@webds/service';
 
-import { WidgetTracker } from "@jupyterlab/apputils";
-
-import { ILauncher } from "@jupyterlab/launcher";
-
-import { Widget } from "@lumino/widgets";
-
-import { WebDSService, WebDSWidget } from "@webds/service";
-
-import { WebDSDocLauncher } from "./launcher";
-
-import { documentationIcon } from "./icons";
+import { documentationIcon } from './icons';
+import { WebDSDocLauncher } from './launcher';
 
 namespace Attributes {
-  export const command = "webds_doc_launcher:open";
-  export const id = "webds_doc_launcher_widget";
-  export const label = "Documentation";
-  export const caption = "Documentation";
-  export const category = "DSDK - Applications";
+  export const command = 'webds_doc_launcher:open';
+  export const id = 'webds_doc_launcher_widget';
+  export const label = 'Documentation';
+  export const caption = 'Documentation';
+  export const category = 'DSDK - Applications';
   export const rank = 20;
 }
 
@@ -29,7 +24,7 @@ namespace Attributes {
  * Initialization data for the @webds/doc_launcher extension.
  */
 const plugin: JupyterFrontEndPlugin<void> = {
-  id: "@webds/doc_launcher:plugin",
+  id: '@webds/doc_launcher:plugin',
   autoStart: true,
   requires: [ILauncher, ILayoutRestorer],
   optional: [WebDSService],
@@ -39,7 +34,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
     restorer: ILayoutRestorer,
     service: WebDSService | null
   ) => {
-    console.log("JupyterLab extension @webds/doc_launcher is activated!");
+    console.log('JupyterLab extension @webds/doc_launcher is activated!');
 
     let widget: WebDSWidget;
     const { commands, shell } = app;
@@ -48,11 +43,11 @@ const plugin: JupyterFrontEndPlugin<void> = {
       label: Attributes.label,
       caption: Attributes.caption,
       icon: (args: { [x: string]: any }) =>
-        args["isLauncher"] ? documentationIcon : undefined,
+        args['isLauncher'] ? documentationIcon : undefined,
       execute: () => {
         if (!widget || widget.isDisposed) {
           const callback = (item: Widget): void => {
-            shell.add(item, "main");
+            shell.add(item, 'main');
           };
           const docLauncher = new WebDSDocLauncher(
             commands,
@@ -69,7 +64,7 @@ const plugin: JupyterFrontEndPlugin<void> = {
 
         if (!tracker.has(widget)) tracker.add(widget);
 
-        if (!widget.isAttached) shell.add(widget, "main");
+        if (!widget.isAttached) shell.add(widget, 'main');
 
         shell.activateById(widget.id);
       }
