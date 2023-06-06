@@ -47,6 +47,18 @@ export class WebDSDocLauncher extends VDomRenderer {
   }
 
   protected render(): React.ReactElement<any> | null {
+    const checkingConnection = this._service?.pinormos.isCheckingConnection();
+    const webdsConfigLauncherElement = document.getElementsByClassName(
+      LAUNCHER_CLASS
+    )[0];
+    if (webdsConfigLauncherElement && checkingConnection !== undefined) {
+      if (checkingConnection) {
+        webdsConfigLauncherElement.classList.add('backdrop');
+      } else {
+        webdsConfigLauncherElement.classList.remove('backdrop');
+      }
+    }
+
     const docItems: any[] = [];
     each(this._items, item => {
       if (item.category == 'DSDK - Documentation') {
@@ -78,11 +90,14 @@ export class WebDSDocLauncher extends VDomRenderer {
     );
 
     return (
-      <div className="jp-webdsDocLauncher-body">
-        <div className="jp-webdsDocLauncher-content">
-          <div className="jp-webdsDocLauncher-content-main">{content}</div>
+      <>
+        <div className="jp-webdsDocLauncher-body">
+          <div className="jp-webdsDocLauncher-content">
+            <div className="jp-webdsDocLauncher-content-main">{content}</div>
+          </div>
         </div>
-      </div>
+        <div className="jp-webdsDocLauncher-backdrop"></div>
+      </>
     );
   }
 
